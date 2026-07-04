@@ -7,6 +7,9 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME || 'ayaka_fansite',
   waitForConnections: true,
   connectionLimit: 5,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 10000,
+  connectTimeout: 10000,
 });
 
 let initialized = false;
