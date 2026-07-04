@@ -157,9 +157,36 @@ export default function ChatUI() {
     }
   };
 
-  const handleTTS = (text: string) => {
-    // TTS placeholder — will implement when user figures out the API
-    console.log('TTS requested:', text.slice(0, 50));
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleTTS = async (text: string) => {
+    if (isPlaying) {
+      audioRef.current?.pause();
+      setIsPlaying(false);
+      return;
+    }
+    try {
+      setIsPlaying(true);
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) throw new Error('TTS failed');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => {
+        setIsPlaying(false);
+        URL.revokeObjectURL(url);
+      };
+      audio.onerror = () => setIsPlaying(false);
+      await audio.play();
+    } catch {
+      setIsPlaying(false);
+    }
   };
 
   return (
@@ -218,10 +245,12 @@ export default function ChatUI() {
                 {msg.role === 'assistant' && (
                   <button
                     onClick={() => handleTTS(msg.content)}
-                    className="mt-2 text-ice-400/40 hover:text-ice-300/60 text-xs transition-colors"
+                    className={`mt-2 text-xs transition-colors ${
+                      isPlaying ? 'text-ice-300/80' : 'text-ice-400/40 hover:text-ice-300/60'
+                    }`}
                     title="语音朗读"
                   >
-                    🔊 朗读
+                    {isPlaying ? '⏸ 停止' : '🔊 朗读'}
                   </button>
                 )}
               </div>
