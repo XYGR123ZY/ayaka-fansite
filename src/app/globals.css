@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  --ice-50: #f0f7fa;
+  --ice-100: #dceef5;
+  --ice-200: #b8dce8;
+  --ice-300: #8bc8d8;
+  --ice-400: #5baec6;
+  --ice-500: #3d94ae;
+  --ice-600: #2d4a5e;
+  --ice-700: #223b4d;
+  --ice-800: #1a2d3c;
+  --ice-900: #0f1a24;
+  --sakura: #d4c5f0;
+  --gold: #d4a853;
+  --warm: #faf8f5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(170deg, var(--ice-800) 0%, var(--ice-700) 30%, var(--ice-600) 60%, var(--ice-800) 100%);
+  color: var(--ice-50);
+  font-family: 'Inter', system-ui, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Glass card base */
+.glass {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+}
+
+.glass-light {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Chat bubble styles */
+@layer components {
+  .chat-bubble-user {
+    @apply bg-ice-500/40 backdrop-blur-sm border border-ice-400/20 rounded-2xl rounded-tr-sm px-4 py-3 max-w-[80%] ml-auto;
+  }
+  .chat-bubble-ayaka {
+    @apply glass-light rounded-2xl rounded-tl-sm px-4 py-3 max-w-[80%];
+  }
+}
