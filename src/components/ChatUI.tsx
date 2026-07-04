@@ -158,32 +158,22 @@ export default function ChatUI() {
   };
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const handleTTS = async (text: string) => {
+  const handleTTS = (text: string) => {
     if (isPlaying) {
-      audioRef.current?.pause();
+      speechSynthesis.cancel();
       setIsPlaying(false);
       return;
     }
     try {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'zh-CN';
+      utterance.rate = 0.95;   // slightly slower = Ayaka's gentle tone
+      utterance.pitch = 1.15;  // slightly warmer
+      utterance.onend = () => setIsPlaying(false);
+      utterance.onerror = () => setIsPlaying(false);
       setIsPlaying(true);
-      const res = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
-      });
-      if (!res.ok) throw new Error('TTS failed');
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      audioRef.current = audio;
-      audio.onended = () => {
-        setIsPlaying(false);
-        URL.revokeObjectURL(url);
-      };
-      audio.onerror = () => setIsPlaying(false);
-      await audio.play();
+      speechSynthesis.speak(utterance);
     } catch {
       setIsPlaying(false);
     }
