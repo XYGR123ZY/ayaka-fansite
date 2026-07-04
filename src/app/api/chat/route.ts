@@ -27,6 +27,18 @@ const SYSTEM_PROMPT = (() => {
 
 const DEFAULT_USER_ID = 1;
 
+// GET — 加载历史消息，让前端和 AI 看到的上下文保持一致
+export async function GET() {
+  try {
+    await ensureUser(DEFAULT_USER_ID);
+    const conv = await ensureConversation(DEFAULT_USER_ID);
+    const messages = await getRecentMessages(conv.id, 50);
+    return Response.json({ messages });
+  } catch (e: unknown) {
+    return Response.json({ error: (e as Error).message }, { status: 500 });
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

@@ -11,6 +11,7 @@ interface Message {
 
 export default function ChatUI() {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
@@ -18,6 +19,17 @@ export default function ChatUI() {
   const inputRef = useRef<HTMLInputElement>(null);
   const searchParams = useSearchParams();
   const hintSent = useRef(false);
+
+  // Load chat history on mount — so UI shows what the AI already knows
+  useEffect(() => {
+    fetch('/api/chat')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.messages) setMessages(data.messages);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingHistory(false));
+  }, []);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -157,27 +169,8 @@ export default function ChatUI() {
     }
   };
 
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const handleTTS = (text: string) => {
-    if (isPlaying) {
-      speechSynthesis.cancel();
-      setIsPlaying(false);
-      return;
-    }
-    try {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'zh-CN';
-      utterance.rate = 0.95;   // slightly slower = Ayaka's gentle tone
-      utterance.pitch = 1.15;  // slightly warmer
-      utterance.onend = () => setIsPlaying(false);
-      utterance.onerror = () => setIsPlaying(false);
-      setIsPlaying(true);
-      speechSynthesis.speak(utterance);
-    } catch {
-      setIsPlaying(false);
-    }
-  };
+  // TODO: TTS 暂时禁用，待找到像绫华的声线后再启用
+  // (浏览器默认中文女声和绫华不搭，后续考虑 VITS 模型或日系女声 TTS)
 
   return (
     <div className="flex flex-col h-full">
@@ -232,17 +225,6 @@ export default function ChatUI() {
             >
               <div className={msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-ayaka'}>
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                {msg.role === 'assistant' && (
-                  <button
-                    onClick={() => handleTTS(msg.content)}
-                    className={`mt-2 text-xs transition-colors ${
-                      isPlaying ? 'text-ice-300/80' : 'text-ice-400/40 hover:text-ice-300/60'
-                    }`}
-                    title="语音朗读"
-                  >
-                    {isPlaying ? '⏸ 停止' : '🔊 朗读'}
-                  </button>
-                )}
               </div>
             </motion.div>
           ))}
